@@ -8,6 +8,9 @@ This project uses Apache Airflow to orchestrate a weekly task that:
 - Fetches EUR exchange rates for yesterday (T-1) from the [Frankfurter API](https://www.frankfurter.app/)
 - Runs automatically every Friday at 02:00 UTC
 - Saves exchange rate data to JSON files
+- Calculates percentage changes between current and previous rates
+- Saves processed data to JSON files
+- Saves processed data to PostgreSQL database
 - Runs entirely in Docker containers
 
 ## Architecture
@@ -26,7 +29,6 @@ The system consists of the following Docker services:
 
 ### 1. Start the Services
 
-```bash
 ```bash
 # From project root
 docker-compose up -d
@@ -49,19 +51,6 @@ Login credentials:
 - **Username**: `airflow`
 - **Password**: `airflow`
 
-### 3. Enable the DAG
-
-1. In the Airflow UI, you'll see the `currency_exchange_dag`
-2. Toggle the switch to enable it
-3. The DAG will run automatically every Friday at 02:00 UTC
-
-### 4. Trigger Manual Run (Optional)
-
-To test immediately without waiting for Friday:
-1. Click on the `currency_exchange_dag` in the UI
-2. Click the "Play" button (▶) in the top right
-3. Select "Trigger DAG"
-4. Monitor execution in the Grid or Graph view
 
 ## Project Structure
 
