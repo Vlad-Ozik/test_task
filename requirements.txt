@@ -1,0 +1,6 @@
+# Airflow and dependencies
+apache-airflow==2.8.0
+apache-airflow-providers-http==4.7.0
+
+# HTTP library for API requests
+requests==2.31.0
