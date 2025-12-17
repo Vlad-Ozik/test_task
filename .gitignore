@@ -38,10 +38,6 @@ ENV/
 .coverage
 htmlcov/
 
-# Environment variables
-.env
-.env.local
-
 # Airflow
 logs/
 data/
