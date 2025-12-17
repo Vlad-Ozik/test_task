@@ -6,7 +6,7 @@ from datetime import datetime
 # Add src to path to import the module
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from fetch_exchange_rates import calculate_percentage_change, get_last_business_day
+from fetch_exchange_rates import calculate_percentage_change
 
 class TestCalculations(unittest.TestCase):
 
@@ -67,19 +67,6 @@ class TestCalculations(unittest.TestCase):
         changes = calculate_percentage_change(current_rates, previous_rates)
         
         self.assertEqual(changes['USD']['pct_change'], 12.3456)
-
-    def test_get_last_business_day_simple(self):
-        """Test that it returns a string date"""
-        date_str = get_last_business_day()
-        # Should match YYYY-MM-DD format
-        self.assertRegex(date_str, r'^\d{4}-\d{2}-\d{2}$')
-
-    def test_get_last_business_day_weekend_skip(self):
-        """Test that it specifically skips weekends"""
-        # Monday -> Sunday (skip) -> Saturday (skip) -> Friday
-        monday = datetime(2023, 10, 23) # Oct 23 2023 is a Monday
-        result = get_last_business_day(monday)
-        self.assertEqual(result, '2023-10-20') # Should be Friday Oct 20
 
 if __name__ == '__main__':
     unittest.main()

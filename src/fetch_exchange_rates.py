@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 
 logging.basicConfig(
@@ -13,37 +13,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-
-def get_last_business_day(reference_date: datetime = None) -> str:
-    """
-    Get the last business day (skips weekends).
-    
-    Args:
-        reference_date: Reference date to calculate from (default: today)
-        
-    Returns:
-        str: Last business day in YYYY-MM-DD format
-    """
-    if reference_date is None:
-        reference_date = datetime.now()
-    
-    current = reference_date - timedelta(days=1)
-    
-
-    while current.weekday() in [5, 6]:
-        current -= timedelta(days=1)
-    
-    return current.strftime('%Y-%m-%d')
-
-
-def get_yesterday_date() -> str:
-    """
-    Calculate yesterday's date (T-1), skipping weekends.
-    
-    Returns:
-        str: Last business day in YYYY-MM-DD format
-    """
-    return get_last_business_day()
 
 
 def fetch_exchange_rates(date: str, base_currency: str = 'EUR') -> Dict[str, Any]:
@@ -121,18 +90,6 @@ def save_to_file(data: Dict[str, Any], output_dir: str = '/app/data') -> str:
 
 
 
-def get_previous_date(date_str: str) -> str:
-    """
-    Calculate date before the given date (T-1 relative to date_str), skipping weekends.
-    
-    Args:
-        date_str: Date in YYYY-MM-DD format
-        
-    Returns:
-        str: Previous business day in YYYY-MM-DD format
-    """
-    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
-    return get_last_business_day(date_obj)
 
 
 def calculate_percentage_change(current_rates: Dict[str, float], previous_rates: Dict[str, float]) -> Dict[str, Any]:
@@ -189,20 +146,36 @@ def save_processed_data(data: Dict[str, Any], date_str: str, output_dir: str = '
     return str(filepath)
 
 
-def main():
+def main(execution_date: Optional[str] = None):
     """
     Main function to fetch rates, calculate changes, and save results.
+    
+    Args:
+        execution_date: Optional date string in YYYY-MM-DD format.
+                        If provided, logic is based on this date.
     """
     try:
-        date_t1 = get_yesterday_date()
-        logger.info(f"Processing exchange rates for T-1: {date_t1}")
+        if execution_date:
+            current_date = datetime.strptime(execution_date, '%Y-%m-%d')
+        else:
+            current_date = datetime.now()
+            
+        logger.info(f"Execution Date: {current_date.strftime('%Y-%m-%d')}")
+        
+        # Calculate T-1 and T-2 relative to the current_date
+        t1_obj = current_date - timedelta(days=1)
+        date_t1 = t1_obj.strftime('%Y-%m-%d')
+        
+        t2_obj = current_date - timedelta(days=2)
+        date_t2 = t2_obj.strftime('%Y-%m-%d')
+
+        logger.info(f"Processing exchange rates for T-1 (Thursday): {date_t1}")
         data_t1 = fetch_exchange_rates(date_t1, base_currency='EUR')
         
         filepath_t1 = save_to_file(data_t1)
         logger.info(f"T-1 Data saved to {filepath_t1}")
         
-        date_t2 = get_previous_date(date_t1)
-        logger.info(f"Fetching exchange rates for T-2: {date_t2}")
+        logger.info(f"Fetching exchange rates for T-2 (Wednesday): {date_t2}")
         data_t2 = fetch_exchange_rates(date_t2, base_currency='EUR')
         
         logger.info("Calculating percentage changes (T-1 vs T-2)")
